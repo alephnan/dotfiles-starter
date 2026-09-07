@@ -125,6 +125,25 @@ install_release() {
   hash -r
 }
 
+install_tree_sitter_from_source() {
+  # Official binaries need glibc 2.39; Debian 12 has an older glibc. Use a
+  # temporary compiler, retaining only the resulting CLI in the user's home.
+  local destination="$HOME/.local/share/dotfiles-starter/tools/tree-sitter-$TREE_SITTER_VERSION"
+  log 'Building Tree-sitter for this system (temporary Rust compiler; first install takes several minutes)'
+  curl --fail --location --silent --show-error --retry 3 --proto '=https' --tlsv1.2 \
+    https://sh.rustup.rs -o "$TEMP_DIR/build-rustup.sh"
+  env RUSTUP_HOME="$TEMP_DIR/build-rustup" CARGO_HOME="$TEMP_DIR/build-cargo" \
+    sh "$TEMP_DIR/build-rustup.sh" -y --no-modify-path --profile minimal --default-toolchain stable
+  env RUSTUP_HOME="$TEMP_DIR/build-rustup" CARGO_HOME="$TEMP_DIR/build-cargo" \
+    "$TEMP_DIR/build-cargo/bin/cargo" install tree-sitter-cli --version "$TREE_SITTER_VERSION" \
+    --locked --root "$TEMP_DIR/tree-sitter-build"
+  [[ ! -e "$destination" && ! -L "$destination" ]] || die "Move the incompatible installation at $destination aside, then rerun."
+  mkdir -p -- "$destination"
+  cp -- "$TEMP_DIR/tree-sitter-build/bin/tree-sitter" "$destination/tree-sitter"
+  link_file "$destination/tree-sitter" .local/bin/tree-sitter
+  hash -r
+}
+
 install_packages() {
   command -v sudo >/dev/null || die 'Install sudo first, then rerun as your normal user.'
   local -a options=() packages
@@ -146,7 +165,11 @@ install_packages() {
     install_release nvim "$NVIM_VERSION" "$NVIM_URL" "$NVIM_SHA256" nvim
   fi
   if ! command -v tree-sitter >/dev/null || ! version_at_least "$(command_version tree-sitter)" 0.26.1; then
-    install_release tree-sitter "$TREE_SITTER_VERSION" "$TREE_SITTER_URL" "$TREE_SITTER_SHA256" gzip
+    if [[ "$DISTRO" == debian && "$VERSION_ID" == 12 ]]; then
+      install_tree_sitter_from_source
+    else
+      install_release tree-sitter "$TREE_SITTER_VERSION" "$TREE_SITTER_URL" "$TREE_SITTER_SHA256" gzip
+    fi
   fi
   if ! command -v starship >/dev/null; then
     install_release starship "$STARSHIP_VERSION" "$STARSHIP_URL" "$STARSHIP_SHA256" tar

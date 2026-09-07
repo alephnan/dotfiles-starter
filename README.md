@@ -76,10 +76,16 @@ Tree-sitter **0.26.3**, and Starship **1.26.0** releases. Downloads are checked
 against SHA-256 hashes in `scripts/releases.sh`, then installed under
 `~/.local/share/dotfiles-starter/tools` with links in `~/.local/bin`.
 
+Debian 12's system library is too old for the official Tree-sitter binary.
+On that version only, setup builds the same CLI release from its locked source
+dependencies using a temporary Rust compiler. This first installation takes
+several minutes and extra download/disk space; the temporary compiler is removed
+when setup exits. It does not install a persistent Rust development toolchain.
+
 Neovim plugin commits, including lazy.nvim, are recorded in `lazy-lock.json`;
 tmux plugin commits are recorded in the installer. Parser installation finishes
 before setup reports success. Blink uses its prebuilt matcher when available
-and falls back to Lua, so the default installation needs no Rust compiler.
+and falls back to Lua, so completion needs no Rust compiler.
 System packages and optional language tools follow their upstream releases;
 this is not a fully locked operating-system image.
 

@@ -126,6 +126,17 @@ class InstallerTests(unittest.TestCase):
         self.run_bash('prepend_bin "$HOME/.local/bin"; prepend_bin "$HOME/.local/bin"; '
                       '[[ "$PATH" != *"$HOME/.local/bin:$HOME/.local/bin"* ]]')
 
+    def test_shell_starts_without_optional_tools_and_loads_local_hook(self):
+        for directory in (".local/bin", ".cargo/bin", "empty-path"):
+            (self.home / directory).mkdir(parents=True)
+        (self.home / ".bashrc.local").write_text("export DOTFILES_TEST_LOCAL=loaded\n")
+        env = dict(self.env, PATH=str(self.home / "empty-path"))
+        result = subprocess.run(["/bin/bash", "--noprofile", "--rcfile", str(ROOT / ".bashrc"), "-ic",
+                                 'source "$REPO/.bashrc"; [[ "$DOTFILES_TEST_LOCAL" == loaded ]]; '
+                                 '[[ "$PATH" == "$HOME/.local/bin:$HOME/.cargo/bin:$HOME/empty-path" ]]'],
+                                env=env, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_missing_dependency_fails_before_config_linking(self):
         result = self.run_bash('nvim() { printf "NVIM v0.9.0\\n"; }; tree-sitter() { printf "tree-sitter 0.26.3\\n"; }; '
                               'starship() { :; }; tmux() { :; }; rg() { :; }; fd() { :; }; check_dependencies', success=False)

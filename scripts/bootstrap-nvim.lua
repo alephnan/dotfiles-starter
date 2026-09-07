@@ -1,6 +1,8 @@
 -- Exit unsuccessfully if cloning, building, or parser installation fails.
 local ok, err = xpcall(function()
   vim.env.DOTFILES_BOOTSTRAP = "1"
+  -- -u NONE isolates startup, but also disables plugins until explicitly enabled.
+  vim.go.loadplugins = true
   local config = vim.fn.stdpath("config")
   vim.opt.rtp:prepend(config)
   dofile(config .. "/init.lua")
@@ -20,8 +22,11 @@ local ok, err = xpcall(function()
   require("lazy").load({ plugins = { "nvim-treesitter" } })
   local parsers = require("config.parsers")
   require("nvim-treesitter").install(parsers):wait(300000)
+  -- The site directory may have been created after Neovim cached runtime paths.
+  vim.opt.rtp:prepend(vim.fn.stdpath("data") .. "/site")
   for _, language in ipairs(parsers) do
-    assert(vim.treesitter.language.add(language), "Parser unavailable: " .. language)
+    local loaded, reason = vim.treesitter.language.add(language)
+    assert(loaded, "Parser unavailable: " .. language .. ": " .. tostring(reason))
   end
 end, debug.traceback)
 if not ok then
