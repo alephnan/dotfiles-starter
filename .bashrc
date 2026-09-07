@@ -1,5 +1,5 @@
 # Interactive Bash configuration. Put private additions in ~/.bashrc.local.
-[[ $- == *i* ]] || return
+[[ $- == *i* ]] || return 0
 
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'

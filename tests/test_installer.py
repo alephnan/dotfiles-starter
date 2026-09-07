@@ -137,6 +137,10 @@ class InstallerTests(unittest.TestCase):
                                 env=env, text=True, capture_output=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_noninteractive_shell_config_returns_success(self):
+        result = self.run_bash('source "$REPO/.bashrc"; printf continued')
+        self.assertEqual(result.stdout, "continued")
+
     def test_missing_dependency_fails_before_config_linking(self):
         result = self.run_bash('nvim() { printf "NVIM v0.9.0\\n"; }; tree-sitter() { printf "tree-sitter 0.26.3\\n"; }; '
                               'starship() { :; }; tmux() { :; }; rg() { :; }; fd() { :; }; check_dependencies', success=False)
