@@ -1,0 +1,46 @@
+name: Validate
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Shell syntax, lint, and installer safety tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          bash -n bootstrap.sh .bashrc .bash_profile scripts/*.sh tests/*.sh
+          shellcheck -x -s bash bootstrap.sh .bashrc .bash_profile scripts/*.sh tests/*.sh
+          python3 -m unittest discover -s tests -v
+      - name: Audit files and history
+        run: |
+          python3 scripts/check-privacy.py
+          ./scripts/check-secrets.sh
+
+  install:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [archlinux:latest, ubuntu:24.04, ubuntu:26.04, debian:12, debian:13]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fresh install, optional tools, and repeat install
+        env:
+          TEST_IMAGE: ${{ matrix.image }}
+        run: docker run --rm -v "$PWD:/source:ro" "$TEST_IMAGE" bash /source/tests/container.sh

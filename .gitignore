@@ -1,0 +1,36 @@
+# Private configuration and authentication
+.bashrc.local
+.bash_profile.local
+.gitconfig
+.git-credentials
+.netrc
+.env
+.env.*
+*.pem
+*.key
+id_*
+hosts.yml
+.ssh/
+.aws/
+.azure/
+.docker/
+.config/gh/
+.codex/
+.claude/
+.claude.json
+.gemini/
+.opencode/
+
+# Local state, downloads, and backups
+*_history
+.viminfo
+.cache/
+.local/
+.tmux/plugins/
+.dotfiles-backup-*/
+*.bak
+*.bak.*
+*.orig
+*~
+__pycache__/
+.venv/

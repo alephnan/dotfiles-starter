@@ -1,0 +1,93 @@
+// Windows Terminal — reusable fragment
+//
+// This is NOT a drop-in settings.json. Profile GUIDs and the `source` field are
+// generated per machine, so copying the whole file over would point Windows
+// Terminal at profiles that do not exist there. Merge the pieces below into the
+// existing settings.json instead (Settings -> "Open JSON file", or
+// %LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json).
+//
+// Prerequisite: install "CaskaydiaCove Nerd Font" first, or the powerline
+// separators in the tmux status bar and the nvim devicons render as tofu boxes.
+// See README.md in this directory.
+
+
+// ── 1. Append to the top-level "schemes" array ────────────────────────
+// The Catppuccin Mocha palette. This is what makes the terminal background and
+// the 16 ANSI colours agree with the nvim / tmux / starship theming.
+
+{
+    "background": "#1E1E2E",
+    "black": "#45475A",
+    "blue": "#89B4FA",
+    "brightBlack": "#585B70",
+    "brightBlue": "#89B4FA",
+    "brightCyan": "#94E2D5",
+    "brightGreen": "#A6E3A1",
+    "brightPurple": "#F5C2E7",
+    "brightRed": "#F38BA8",
+    "brightWhite": "#A6ADC8",
+    "brightYellow": "#F9E2AF",
+    "cursorColor": "#F5E0DC",
+    "cyan": "#94E2D5",
+    "foreground": "#CDD6F4",
+    "green": "#A6E3A1",
+    "name": "Catppuccin Mocha",
+    "purple": "#F5C2E7",
+    "red": "#F38BA8",
+    "selectionBackground": "#585B70",
+    "white": "#BAC2DE",
+    "yellow": "#F9E2AF"
+}
+
+
+// ── 2. Merge into the WSL profile in "profiles" -> "list" ─────────────
+// Find the profile for your WSL distribution and add these
+// keys to it. Keep that machine's own "guid", "name" and "source" values —
+// only the styling below is portable.
+
+{
+    "colorScheme": "Catppuccin Mocha",
+    "font": {
+        "face": "CaskaydiaCove Nerd Font",
+        "size": 11
+    },
+    "opacity": 53,
+    "useAcrylic": true
+}
+
+
+// ── 3. Merge into "profiles" -> "defaults" ────────────────────────────
+// Applies to every other profile, so only the WSL profile above is
+// translucent and the rest stay opaque.
+
+{
+    "opacity": 100,
+    "useAcrylic": false
+}
+
+
+// ── 4. Merge into the top-level "keybindings" array ──────────────────────
+// Optional shortcuts: preserve existing bindings and replace only matching keys.
+// Note: with copyOnSelect false, ctrl+c still sends SIGINT when nothing is
+// selected, so this does not break interrupting a running command.
+
+[
+    {
+        "id": "Terminal.CopyToClipboard",
+        "keys": "ctrl+c"
+    },
+    {
+        "id": "Terminal.PasteFromClipboard",
+        "keys": "ctrl+v"
+    },
+    {
+        "id": "Terminal.DuplicatePaneAuto",
+        "keys": "alt+shift+d"
+    }
+]
+
+
+// ── 5. Optional top-level settings ────────────────────────────────
+// "copyOnSelect": false,
+// "copyFormatting": "none",
+// "defaultProfile": "<guid of your own WSL profile>"
