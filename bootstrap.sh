@@ -135,6 +135,7 @@ install_tree_sitter_from_source() {
   env RUSTUP_HOME="$TEMP_DIR/build-rustup" CARGO_HOME="$TEMP_DIR/build-cargo" \
     sh "$TEMP_DIR/build-rustup.sh" -y --no-modify-path --profile minimal --default-toolchain stable
   env RUSTUP_HOME="$TEMP_DIR/build-rustup" CARGO_HOME="$TEMP_DIR/build-cargo" \
+    CARGO_TARGET_DIR="$TEMP_DIR/build-target" RUSTUP_TOOLCHAIN=stable \
     "$TEMP_DIR/build-cargo/bin/cargo" install tree-sitter-cli --version "$TREE_SITTER_VERSION" \
     --locked --root "$TEMP_DIR/tree-sitter-build"
   [[ ! -e "$destination" && ! -L "$destination" ]] || die "Move the incompatible installation at $destination aside, then rerun."
@@ -156,6 +157,9 @@ install_packages() {
   else
     (( ASSUME_YES == 0 )) || options+=(-y)
     packages=(build-essential git curl ca-certificates tar gzip unzip tmux ripgrep fd-find)
+    if [[ "$DISTRO" == debian && "$VERSION_ID" == 12 ]]; then
+      packages+=(libclang-dev)
+    fi
     (( WITH_DEV_TOOLS == 0 )) || packages+=(python3 python3-venv)
     sudo apt-get update
     sudo apt-get install "${options[@]}" "${packages[@]}"

@@ -1,6 +1,5 @@
 -- Exit unsuccessfully if cloning, building, or parser installation fails.
 local ok, err = xpcall(function()
-  vim.env.DOTFILES_BOOTSTRAP = "1"
   -- -u NONE isolates startup, but also disables plugins until explicitly enabled.
   vim.go.loadplugins = true
   local config = vim.fn.stdpath("config")
@@ -15,7 +14,7 @@ local ok, err = xpcall(function()
       assert(plugin._.installed, "Plugin is missing: " .. name)
     end
   end
-  manager.install({ wait = true, show = false, lockfile = true })
+  -- lazy.setup installs missing plugins synchronously using the existing lockfile.
   check_plugins()
   manager.restore({ wait = true, show = false })
   check_plugins()

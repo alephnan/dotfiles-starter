@@ -24,6 +24,7 @@ runuser -u tester -- env HOME="$test_home" bash --noprofile --norc -c '
   cd "$HOME/dotfiles"
   ./bootstrap.sh --dry-run
   ./bootstrap.sh --yes
+  [[ ! -d "$HOME/.cargo" && ! -d "$HOME/.rustup" ]]
   ./tests/smoke.sh 0
   ./bootstrap.sh --yes --with-dev-tools
   ./tests/smoke.sh 1
